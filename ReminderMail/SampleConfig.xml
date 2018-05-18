@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mail>
+  <!-- 0=don't send; >=1= if daynumber MOD freq == 0 then send (1=every day, 2=all even days, ...) -->
+  <frequency>0</frequency>
+  <receivers>
+    <!-- any number of <to>, <cc> and <bcc> nodes containing one email address each -->
+    <to><!-- mail address of TO: receiver --></to>
+  </receivers>
+  <!-- sender as sent in email AND account to use. If bcc=true, then also add as bcc -->
+  <from bcc="true"><!-- mail address of sender --></from>
+  <!-- subject of mail message -->
+  <subject>Reminder mail</subject>
+  <!-- text of mail message. type=html or text -->
+  <message type="text"><![CDATA[
+LS,
+
+This is a reminder.
+Regards
+]]></message>
+</mail>
