@@ -169,6 +169,11 @@ namespace ReminderMail
 
         private string Encrypt(string text)
         {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
             var bytes = Encoding.UTF8.GetBytes(text);
 
             return Convert.ToBase64String(bytes);
@@ -181,9 +186,18 @@ namespace ReminderMail
                 return null;
             }
 
-            var bytes = Convert.FromBase64String(text);
+            try
+            {
+                var bytes = Convert.FromBase64String(text);
 
-            return Encoding.UTF8.GetString(bytes);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                this.Password = null;
+                this.UpdateConfig();
+                return null;
+            }
         }
 
         /// <summary>
