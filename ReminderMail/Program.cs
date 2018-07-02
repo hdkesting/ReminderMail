@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ReminderMail
 {
@@ -39,8 +36,15 @@ namespace ReminderMail
                 config.SetPassword(ReadPassword());
             }
 
-            SendMail(config);
-            Thread.Sleep(2000);
+            if (SendMail(config))
+            {
+                Thread.Sleep(2000);
+            }
+            else
+            {
+                Console.Write("Press enter > ");
+                Console.ReadLine();
+            }
 
             return 0;
         }
@@ -71,7 +75,7 @@ namespace ReminderMail
             return pwd.ToString();
         }
 
-        private static void SendMail(Configuration config)
+        private static bool SendMail(Configuration config)
         {
             SmtpClient smtpClient = new SmtpClient();
             NetworkCredential basicCredential = new NetworkCredential(config.Account, config.Password);
@@ -116,16 +120,19 @@ namespace ReminderMail
                 Console.WriteLine("Sending ...");
                 smtpClient.Send(message);
                 Console.WriteLine("Done!");
+                return true;
             }
             catch (Exception ex)
             {
                 config.ClearPassword();
-                Console.Error.WriteLine("Error sending mail. Stored password is cleared.");
+                Console.Error.WriteLine("Error sending mail. Stored password is cleared. Will be asked on next run.");
                 while (ex != null)
                 {
                     Console.Error.WriteLine(ex.Message);
                     ex = ex.InnerException;
                 }
+
+                return false;
             }
         }
     }
