@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mail>
+  <!-- 0=don't send; >=1= if daynumber MOD freq == 0 then send (1=every day, 2=all even days, ...) -->
+  <frequency>1</frequency>
+  <receivers>
+    <!-- any number of <to>, <cc> and <bcc> nodes containing one email address each -->
+    <to>Marcel_De_Mooij@epam.com</to>
+    <to>Sebastian_Piotrowski@epam.com</to>
+    <to>Ihar_Zharski@epam.com</to>
+    <to>Nikolai_Frolov@epam.com</to>
+    <to>Egbert_Hendriks@epam.com</to>
+    <to>Joost_Bank@epam.com</to>
+  </receivers>
+  <!-- sender as sent in email AND account to use. If bcc=true, then also add as bcc -->
+  <from bcc="true">hans_kesting@epam.com</from>
+  <!-- subject of mail message -->
+  <subject>Reminder mail</subject>
+  <!-- text of mail message. type=html or text -->
+  <message type="html"><![CDATA[
+<p style="font-family: Calibri,sans-serif;">LS,<br/>
+<br/>
+Just as a reminder, I am still available for useful and challenging .Net/C♯ development work, preferably on EPAM projects. I wouldn't mind if that were remote projects.<br/>
+In the meantime, I am open to reasonable suggestions about technologies to investigate.<br/>
+<br/>
+Regards,</p>
+
+<p style="font-size: 11pt; color: #39C2D7; font-family: Arial, sans-serif"><strong>HANS KESTING</strong></p> 
+<p stype="font-size: 10pt; font-family: Arial, sans-serif"><strong>Senior Software Engineer</strong></p> 
+
+<p style="font-size: 8pt">Office: +31 20 241 6134 x 30544   Email: <a href="mailto:hans_kesting@epam.com">hans_kesting@epam.com</a> </p>
+<p style="font-size: 8pt">Delft, Netherlands   <a href="www.epam.com">epam.com</a></p> 
+<p style="font-size: 8pt">CONFIDENTIALITY CAUTION AND DISCLAIMER</p>
+<p style="font-size: 8pt; color: grey">This message is intended only for the use of the individual(s) or entity(ies) to which it is addressed and contains information that is legally privileged and confidential. If you are not the intended recipient, or the person responsible for delivering the message to the intended recipient, you are hereby notified that any dissemination, distribution or copying of this communication is strictly prohibited. All unintended recipients are obliged to delete this message and destroy any printed copies. </p>
+]]></message>
+  <!-- will be asked and encoded when empty -->
+  <password></password>
+</mail>

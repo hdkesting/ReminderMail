@@ -3,12 +3,15 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading;
+using MailKit.Net.Imap;
+using MimeKit;
+using MimeKit.Text;
 
 namespace ReminderMail
 {
-    class Program
+    internal class Program
     {
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
             Configuration config;
             try
@@ -44,6 +47,7 @@ namespace ReminderMail
             {
                 Console.Write("Press enter > ");
                 Console.ReadLine();
+                return 1;
             }
 
             return 0;
@@ -77,55 +81,59 @@ namespace ReminderMail
 
         private static bool SendMail(Configuration config)
         {
-            SmtpClient smtpClient = new SmtpClient();
-            NetworkCredential basicCredential = new NetworkCredential(config.Account, config.Password);
-            MailMessage message = new MailMessage();
-            MailAddress fromAddress = new MailAddress(config.Account);
+            var message = new MimeMessage();
+            var fromAddress = new MailboxAddress(config.Account);
 
-            // setup up the host, increase the timeout to 5 minutes
-            smtpClient.Host = "smtp.office365.com";
-            smtpClient.Port = 587;
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = basicCredential;
-            smtpClient.Timeout = (60 * 5 * 1000);
-            smtpClient.EnableSsl = true;
 
-            message.From = fromAddress;
-            message.Bcc.Add(fromAddress);
+            message.From.Add(fromAddress);
             message.Subject = config.Subject;
-            message.IsBodyHtml = config.MessageIsHtml;
-            message.Body = config.Message;
+            if (config.MessageIsHtml)
+            {
+                message.Body = new TextPart(TextFormat.Html) { Text = config.Message };
+            }
+            else
+            {
+                message.Body = new TextPart(TextFormat.Plain) { Text = config.Message };
+            }
+
             foreach (var addr in config.PrimaryReceivers)
             {
-                message.To.Add(new MailAddress(addr));
+                message.To.Add(new MailboxAddress(addr));
             }
 
             foreach (var addr in config.SecondaryReceivers)
             {
-                message.CC.Add(new MailAddress(addr));
+                message.Cc.Add(new MailboxAddress(addr));
             }
 
             foreach (var addr in config.BlindReceivers)
             {
-                message.Bcc.Add(new MailAddress(addr));
+                message.Bcc.Add(new MailboxAddress(addr));
             }
 
             if (config.AddAccountToBcc)
             {
-                message.Bcc.Add(new MailAddress(config.Account));
+                message.Bcc.Add(new MailboxAddress(config.Account));
             }
 
             try
             {
                 Console.WriteLine("Sending ...");
+                // setup up the smtp connection, increase the timeout to 5 minutes
+                var smtpClient = new MailKit.Net.Smtp.SmtpClient();
+                smtpClient.Connect("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.Auto);
+                smtpClient.Authenticate(config.Account, config.Password);
+                smtpClient.Timeout = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
+
                 smtpClient.Send(message);
                 Console.WriteLine("Done!");
+                smtpClient.Disconnect(true);
                 return true;
             }
             catch (Exception ex)
             {
                 config.ClearPassword();
-                Console.Error.WriteLine("Error sending mail. Stored password is cleared. Will be asked on next run.");
+                Console.Error.WriteLine("Error sending mail. Stored password is cleared - will be asked on next run.");
                 while (ex != null)
                 {
                     Console.Error.WriteLine(ex.Message);
