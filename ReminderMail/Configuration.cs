@@ -20,6 +20,10 @@ namespace ReminderMail
         {
         }
 
+        public string SmtpHost { get; private set; }
+
+        public int SmtpPort { get; private set; }
+
         /// <summary>
         /// Gets the frequency to send. 0 = do not send at all; 1 = every day; 2 = every second day; etc
         /// </summary>
@@ -99,6 +103,8 @@ namespace ReminderMail
         /// The password.
         /// </value>
         public string Password { get; private set; }
+
+        public string ReplyTo { get; private set; }
 
         /// <summary>
         /// Reads the configuration file.
@@ -208,6 +214,10 @@ namespace ReminderMail
         {
             var root = config.Element("mail");
 
+            var smtp = root.Element("smtp");
+            this.SmtpHost = smtp.Element("host")?.Value;
+            this.SmtpPort = int.Parse(smtp.Element("port")?.Value ?? "587");
+
             this.Frequency = int.TryParse(root.Element("frequency").Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int freq) ? freq : 0;
             var rec = root.Element("receivers");
 
@@ -221,6 +231,8 @@ namespace ReminderMail
             AddReceivers(elts, this.BlindReceivers);
 
             this.Account = root.Element("from")?.Value;
+
+            this.ReplyTo = root.Element("replyto")?.Value;
 
             this.AddAccountToBcc = string.Equals("true", root.Element("from")?.Attribute("bcc")?.Value, StringComparison.OrdinalIgnoreCase);
 

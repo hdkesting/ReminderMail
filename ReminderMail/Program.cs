@@ -6,9 +6,9 @@ using System.Threading;
 
 namespace ReminderMail
 {
-    class Program
+    internal class Program
     {
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
             Configuration config;
             try
@@ -53,7 +53,7 @@ namespace ReminderMail
         {
             var pwd = new StringBuilder();
 
-            Console.Error.Write("Enter password of mail account > ");
+            Console.Error.Write("Enter password of mail account (if 2FA enabled, use app-password)> ");
 
             ConsoleKeyInfo key;
             do
@@ -77,24 +77,19 @@ namespace ReminderMail
 
         private static bool SendMail(Configuration config)
         {
-            SmtpClient smtpClient = new SmtpClient();
-            NetworkCredential basicCredential = new NetworkCredential(config.Account, config.Password);
             MailMessage message = new MailMessage();
             MailAddress fromAddress = new MailAddress(config.Account);
-
-            // setup up the host, increase the timeout to 5 minutes
-            smtpClient.Host = "smtp.office365.com";
-            smtpClient.Port = 587;
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = basicCredential;
-            smtpClient.Timeout = (60 * 5 * 1000);
-            smtpClient.EnableSsl = true;
 
             message.From = fromAddress;
             message.Bcc.Add(fromAddress);
             message.Subject = config.Subject;
             message.IsBodyHtml = config.MessageIsHtml;
             message.Body = config.Message;
+            if (!string.IsNullOrWhiteSpace(config.ReplyTo))
+            {
+                message.ReplyToList.Add(config.ReplyTo);
+            }
+
             foreach (var addr in config.PrimaryReceivers)
             {
                 message.To.Add(new MailAddress(addr));
@@ -114,6 +109,16 @@ namespace ReminderMail
             {
                 message.Bcc.Add(new MailAddress(config.Account));
             }
+
+            SmtpClient smtpClient = new SmtpClient();
+            NetworkCredential basicCredential = new NetworkCredential(config.Account, config.Password);
+            // setup up the host, increase the timeout to 5 minutes
+            smtpClient.Host = config.SmtpHost;
+            smtpClient.Port = config.SmtpPort;
+            smtpClient.UseDefaultCredentials = false;
+            smtpClient.Credentials = basicCredential;
+            smtpClient.Timeout = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
+            smtpClient.EnableSsl = true;
 
             try
             {
