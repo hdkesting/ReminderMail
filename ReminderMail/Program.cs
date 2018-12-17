@@ -8,7 +8,7 @@ namespace ReminderMail
 {
     internal class Program
     {
-        private static int Main(string[] args)
+        public static int Main(string[] args)
         {
             Configuration config;
             try
@@ -36,9 +36,11 @@ namespace ReminderMail
                 config.SetPassword(ReadPassword());
             }
 
+            ConsoleCountdown(5);
+
             if (SendMail(config))
             {
-                Thread.Sleep(2000);
+                ConsoleDelay(5);
             }
             else
             {
@@ -138,6 +140,30 @@ namespace ReminderMail
                 }
 
                 return false;
+            }
+        }
+
+        private static void ConsoleCountdown(int seconds)
+        {
+            while (seconds > 0)
+            {
+                Console.Write($"Delaying: {seconds}   ");
+                Console.Write("\r");
+                Thread.Sleep(1000);
+                seconds--;
+            }
+
+            Console.WriteLine("Working ...     ");
+        }
+
+        private static void ConsoleDelay(int seconds)
+        {
+            while (seconds > 0)
+            {
+                Console.Write(new string('.', seconds) + "  ");
+                Console.Write("\r");
+                Thread.Sleep(1000);
+                seconds--;
             }
         }
     }
